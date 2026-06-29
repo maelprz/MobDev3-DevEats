@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import '../../viewmodels/home_viewmodel.dart';
 import '../../widgets/category_chip.dart';
 import '../../widgets/food_card.dart';
-import 'cart_screen.dart';
+import '../cart/cart_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});

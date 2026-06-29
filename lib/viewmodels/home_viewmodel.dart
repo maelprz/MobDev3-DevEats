@@ -138,4 +138,11 @@ class HomeViewModel extends ChangeNotifier {
 
     notifyListeners();
   }
+
+  void clearCart() {
+  for (var food in _foods) {
+    food.quantity = 0;
+  }
+  notifyListeners();
+}
 }
