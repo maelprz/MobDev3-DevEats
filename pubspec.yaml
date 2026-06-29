@@ -28,4 +28,6 @@ flutter:
   assets:
     - .env
     - assets/foods/
+    - assets/rider.jpg
+    - assets/profile.jpg
 

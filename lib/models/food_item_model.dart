@@ -19,4 +19,26 @@ class FoodItem {
     required this.rating,
     this.quantity = 0,
   });
+
+  FoodItem copyWith({
+    int? id,
+    String? name,
+    String? description,
+    double? price,
+    String? imageUrl,
+    String? category,
+    double? rating,
+    int? quantity,
+  }) {
+    return FoodItem(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      description: description ?? this.description,
+      price: price ?? this.price,
+      imageUrl: imageUrl ?? this.imageUrl,
+      category: category ?? this.category,
+      rating: rating ?? this.rating,
+      quantity: quantity ?? this.quantity,
+    );
+  }
 }

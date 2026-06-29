@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../viewmodels/home_viewmodel.dart';
+import '../orders/order_tracking_screen.dart';
 
 class CheckoutScreen extends StatefulWidget {
   const CheckoutScreen({super.key});
@@ -17,8 +18,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   Widget build(BuildContext context) {
     final vm = context.watch<HomeViewModel>();
 
-    final tax = vm.subtotal * 0.05;
-    final total = vm.subtotal + tax;
+    final total = vm.subtotal + vm.deliveryFee;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF3F8FA),
@@ -60,7 +60,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
             const SizedBox(height: 18),
 
-            _buildPriceCard(vm, tax, total),
+            _buildPriceCard(vm, total),
 
             const SizedBox(height: 30),
 
@@ -86,8 +86,20 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               height: 58,
               child: ElevatedButton(
                 onPressed: () {
+                  final orderedItems = vm.cartItems.map((food) {
+                    return food.copyWith();
+                  }).toList();
+
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => OrderTrackingScreen(
+                        orderedItems: orderedItems,
+                      ),
+                    ),
+                  );
+
                   vm.clearCart();
-                  Navigator.pop(context);
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF8DD3F3),
@@ -282,7 +294,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
   Widget _buildPriceCard(
     HomeViewModel vm,
-    double tax,
     double total,
   ) {
     return Container(
@@ -291,8 +302,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       child: Column(
         children: [
           _priceRow("Subtotal", vm.subtotal),
-          _priceRow("Delivery Fee", 0, free: true),
-          _priceRow("Tax & Fees", tax),
+          _priceRow("Delivery Fee", vm.deliveryFee),
 
           const Divider(height: 30),
 

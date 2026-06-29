@@ -133,18 +133,7 @@ class HomeScreen extends StatelessWidget {
                       return FoodCard(
                         food: food,
                         onAdd: () {
-                          vm.addToCart(food.id);
-
-                          ScaffoldMessenger.of(context)
-                              .showSnackBar(
-                            SnackBar(
-                              duration:
-                                  const Duration(seconds: 1),
-                              content: Text(
-                                "${food.name} added to cart!",
-                              ),
-                            ),
-                          );
+                          vm.addToCart(food.id);             
                         },
                       );
                     },
