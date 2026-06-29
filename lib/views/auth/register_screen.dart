@@ -1,10 +1,68 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-class RegisterScreen extends StatelessWidget {
+import '../../viewmodels/auth_viewmodel.dart';
+
+class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
 
   @override
+  State<RegisterScreen> createState() => _RegisterScreenState();
+}
+
+class _RegisterScreenState extends State<RegisterScreen> {
+  final _formKey = GlobalKey<FormState>();
+
+  final _fullNameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _phoneController = TextEditingController();
+  final _passwordController = TextEditingController();
+
+  @override
+  void dispose() {
+    _fullNameController.dispose();
+    _emailController.dispose();
+    _phoneController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _register() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    try {
+      await context.read<AuthViewModel>().register(
+            fullName: _fullNameController.text.trim(),
+            email: _emailController.text.trim(),
+            phoneNumber: _phoneController.text.trim(),
+            password: _passwordController.text,
+          );
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Registration successful!"),
+          backgroundColor: Colors.green,
+        ),
+      );
+
+      Navigator.pop(context);
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.toString()),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final authViewModel = context.watch<AuthViewModel>();
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
@@ -16,86 +74,134 @@ class RegisterScreen extends StatelessWidget {
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
 
-        child: Column(
-          crossAxisAlignment:
-              CrossAxisAlignment.start,
+        child: Form(
+          key: _formKey,
 
-          children: [
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
 
-            const Text(
-              "Create Account",
-              style: TextStyle(
-                fontSize: 32,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+            children: [
 
-            const SizedBox(height: 8),
-
-            const Text(
-              "Start satisfying your cravings with us today.",
-            ),
-
-            const SizedBox(height: 24),
-
-            TextField(
-              decoration: InputDecoration(
-                labelText: "Full Name",
-                border: OutlineInputBorder(),
-              ),
-            ),
-
-            const SizedBox(height: 16),
-
-            TextField(
-              decoration: InputDecoration(
-                labelText: "Email Address",
-                border: OutlineInputBorder(),
-              ),
-            ),
-
-            const SizedBox(height: 16),
-
-            TextField(
-              decoration: InputDecoration(
-                labelText: "Phone Number",
-                border: OutlineInputBorder(),
-              ),
-            ),
-
-            const SizedBox(height: 16),
-
-            TextField(
-              obscureText: true,
-              decoration: InputDecoration(
-                labelText: "Password",
-                border: OutlineInputBorder(),
-              ),
-            ),
-
-            const SizedBox(height: 30),
-
-            SizedBox(
-              width: double.infinity,
-              height: 55,
-
-              child: ElevatedButton(
-                onPressed: () {},
-
-                style: ElevatedButton.styleFrom(
-                  backgroundColor:
-                      const Color(0xFF8DD3F3),
+              const Text(
+                "Create Account",
+                style: TextStyle(
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
                 ),
+              ),
 
-                child: const Text(
-                  "Register →",
-                  style: TextStyle(
-                    color: Colors.black,
+              const SizedBox(height: 8),
+
+              const Text(
+                "Start satisfying your cravings with us today.",
+              ),
+
+              const SizedBox(height: 24),
+
+              TextFormField(
+                controller: _fullNameController,
+                decoration: const InputDecoration(
+                  labelText: "Full Name",
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return "Please enter your full name";
+                  }
+                  return null;
+                },
+              ),
+
+              const SizedBox(height: 16),
+
+              TextFormField(
+                controller: _emailController,
+                keyboardType: TextInputType.emailAddress,
+                decoration: const InputDecoration(
+                  labelText: "Email Address",
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return "Please enter your email";
+                  }
+
+                  if (!value.contains("@")) {
+                    return "Please enter a valid email";
+                  }
+
+                  return null;
+                },
+              ),
+
+              const SizedBox(height: 16),
+
+              TextFormField(
+                controller: _phoneController,
+                keyboardType: TextInputType.phone,
+                decoration: const InputDecoration(
+                  labelText: "Phone Number",
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return "Please enter your phone number";
+                  }
+                  return null;
+                },
+              ),
+
+              const SizedBox(height: 16),
+
+              TextFormField(
+                controller: _passwordController,
+                obscureText: true,
+                decoration: const InputDecoration(
+                  labelText: "Password",
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return "Please enter a password";
+                  }
+
+                  if (value.length < 6) {
+                    return "Password must be at least 6 characters";
+                  }
+
+                  return null;
+                },
+              ),
+
+              const SizedBox(height: 30),
+
+              SizedBox(
+                width: double.infinity,
+                height: 55,
+
+                child: ElevatedButton(
+                  onPressed: authViewModel.isLoading
+                      ? null
+                      : _register,
+
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF8DD3F3),
                   ),
+
+                  child: authViewModel.isLoading
+                      ? const CircularProgressIndicator(
+                          color: Colors.white,
+                        )
+                      : const Text(
+                          "Register →",
+                          style: TextStyle(
+                            color: Colors.black,
+                          ),
+                        ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
