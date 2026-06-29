@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:provider/provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'config/supabase_config.dart';
-import 'views/auth/login_screen.dart';
-import 'views/home/home_screen.dart';
+
 import 'viewmodels/auth_viewmodel.dart';
+import 'viewmodels/home_viewmodel.dart';
+
+import 'views/auth/login_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -26,14 +28,26 @@ class DevEatsApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => AuthViewModel(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (_) => AuthViewModel(),
+        ),
+
+        ChangeNotifierProvider(
+          create: (_) => HomeViewModel(),
+        ),
+      ],
+
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         title: "DevEats",
+
         theme: ThemeData(
-          fontFamily: 'Roboto',
+          fontFamily: "Roboto",
+          useMaterial3: true,
         ),
+
         home: const LoginScreen(),
       ),
     );
