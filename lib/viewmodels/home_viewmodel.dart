@@ -33,7 +33,7 @@ class HomeViewModel extends ChangeNotifier {
     FoodItem(
       id: 4,
       name: "Iced Lemon Tea",
-      description: "Refreshing Citrus Drink",
+      description: "Refreshing Lemon Tea",
       price: 120,
       imageUrl: "assets/foods/drink.jpg",
       category: "Drinks",
@@ -50,8 +50,6 @@ class HomeViewModel extends ChangeNotifier {
     ),
   ];
 
-  List<FoodItem> get foods => filteredFoods;
-
   final List<String> categories = [
     "All",
     "Pizza",
@@ -64,13 +62,28 @@ class HomeViewModel extends ChangeNotifier {
   String selectedCategory = "All";
   String searchText = "";
 
-  void selectCategory(String category) {
-    selectedCategory = category;
-    notifyListeners();
-  }
+  List<FoodItem> get foods => filteredFoods;
+
+  List<FoodItem> get cartItems =>
+      _foods.where((food) => food.quantity > 0).toList();
+
+  int get cartCount =>
+      cartItems.fold(0, (sum, food) => sum + food.quantity);
+
+  double get subtotal =>
+      cartItems.fold(0, (sum, food) => sum + (food.price * food.quantity));
+
+  double get deliveryFee => cartItems.isEmpty ? 0 : 50;
+
+  double get total => subtotal + deliveryFee;
 
   void search(String value) {
     searchText = value;
+    notifyListeners();
+  }
+
+  void selectCategory(String category) {
+    selectedCategory = category;
     notifyListeners();
   }
 
@@ -83,9 +96,7 @@ class HomeViewModel extends ChangeNotifier {
   }
 
   List<FoodItem> get filteredFoods {
-    if (selectedCategory == "All") {
-      return searchedFoods;
-    }
+    if (selectedCategory == "All") return searchedFoods;
 
     return searchedFoods.where((food) {
       return food.category == selectedCategory;
@@ -93,18 +104,38 @@ class HomeViewModel extends ChangeNotifier {
   }
 
   void addToCart(int id) {
-    final food = _foods.firstWhere((food) => food.id == id);
+    final food = _foods.firstWhere((f) => f.id == id);
+
     food.quantity++;
+
     notifyListeners();
   }
 
-  int get cartCount {
-    int total = 0;
+  void increaseQuantity(int id) {
+    final food = _foods.firstWhere((f) => f.id == id);
 
-    for (final food in _foods) {
-      total += food.quantity;
+    food.quantity++;
+
+    notifyListeners();
+  }
+
+  void decreaseQuantity(int id) {
+    final food = _foods.firstWhere((f) => f.id == id);
+
+    if (food.quantity > 1) {
+      food.quantity--;
+    } else {
+      food.quantity = 0;
     }
 
-    return total;
+    notifyListeners();
+  }
+
+  void removeFromCart(int id) {
+    final food = _foods.firstWhere((f) => f.id == id);
+
+    food.quantity = 0;
+
+    notifyListeners();
   }
 }
